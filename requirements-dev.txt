@@ -1,8 +1,12 @@
 pip >= 20.3
-setuptools >= 50
-wheel
+
+#black
+flake8
+mypy
+#nox
+#pyre-check
+pytest
+pytest-cov
+
 debugpy
 pdbpp
-pytest
-mypy
-black

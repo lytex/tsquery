@@ -1,16 +1,13 @@
+from __future__ import annotations
+
 import codecs
 import sys
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional
 
 import click
-import tree_sitter as ts
 
 from tsquery.parser_registry import ParserRegistry, ParserUnavailable
-
-
-def extract_node(node: ts.Node, source: bytes) -> bytes:
-    return source[node.start_byte : node.end_byte]
 
 
 def war(msg: str) -> None:
@@ -32,20 +29,24 @@ def die(status: int, msg: str) -> None:
 @click.option('-e', '--encoding', default='utf-8')
 @click.option('--list-parsers', is_flag=True, default=False)
 @click.argument('query_text')
-@click.argument('input_files', nargs=-1, type=click.Path(exists=True, dir_okay=False))
-def cli(language: str, encoding: str, query_text: str, list_parsers: bool, input_files: Tuple[Optional[str]]) -> None:
+@click.argument('input_files', nargs=-1, type=click.Path(exists=True, dir_okay=False, allow_dash=True))
+def cli(language: str, encoding: str, query_text: str, list_parsers: bool, input_files: tuple[Optional[str]]) -> None:
+    registry = ParserRegistry()
+
     if list_parsers:
         for f in registry.iter_available():
             click.echo(str(f))
         sys.exit()
 
-    registry = ParserRegistry()
-
     # When looping over input filenames, `None` means "read from stdin"
+    # This is kind of ugly.
     if len(input_files) == 0:
         input_files = (None,)
 
     for input_file in input_files:
+        if input_file == '-':
+            input_file = None
+
         if language is None:
             if input_file is None:
                 die(3, '-l/--language option is required when reading from stdin.')
@@ -66,9 +67,12 @@ def cli(language: str, encoding: str, query_text: str, list_parsers: bool, input
             click.echo(f'Invalid query syntax: {exc!s}', err=True)
             sys.exit(2)
         else:
-            input_file_for_display = input_file or '(standard input)'
+            input_file_for_display = input_file or '(stdin)'
             for i, (node, name) in enumerate(captures):
-                node_source = codecs.decode(extract_node(node, source_bytes), encoding=encoding, errors='surrogateescape')
+                node_start = ','.join(map(str, node.start_point))
+                node_end = ','.join(map(str, node.end_point))
+                node_source_bytes = source_bytes[node.start_byte : node.end_byte]
+                node_source = codecs.decode(node_source_bytes, encoding=encoding, errors='surrogateescape')
                 if i > 0:
                     click.echo('')
-                click.echo(f'{input_file_for_display}:{name}\n{node_source}')
+                click.echo(f'{input_file_for_display} {node_start} {node_end} {name}\n{node_source}')

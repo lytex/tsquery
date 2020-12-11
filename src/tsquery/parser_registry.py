@@ -1,15 +1,19 @@
+from __future__ import annotations
+
 import logging
 from pathlib import Path
-from typing import Dict, Generator, Iterable, List, Literal, Optional, Sequence, Tuple, Union
+from typing import Generator, Iterable, Sequence
 
 import attr
 import tree_sitter as ts
+
+from tsquery.xdg import get_xdg_dirs, get_xdg_home
 
 
 logger = logging.getLogger(__name__)
 
 
-TSTuple = Tuple[ts.Language, ts.Parser]
+TSTuple = tuple[ts.Language, ts.Parser]
 
 
 DEFAULT_PARSER_PATHS = (
@@ -26,7 +30,7 @@ def iter_available_parsers(parser_paths: Iterable[Path]) -> Generator[Path, None
                     yield f
 
 
-def list_available_parsers(parser_paths: Iterable[Path]) -> List[Path]:
+def list_available_parsers(parser_paths: Iterable[Path]) -> list[Path]:
     return list(iter_available_parsers(parser_paths))
 
 
@@ -55,7 +59,7 @@ class ParserUnavailable(Exception):
 
 @attr.s
 class ParserRegistry:
-    parsers: Dict[str, TSTuple]
+    parsers: dict[str, TSTuple]
     parser_paths: Sequence[Path] = attr.ib(default=DEFAULT_PARSER_PATHS)
 
     def __attrs_post_init__(self):
@@ -65,11 +69,12 @@ class ParserRegistry:
     def iter_available(self) -> Generator[Path, None, None]:
         return iter_available_parsers(self.parser_paths)
 
-    def list_available(self) -> List[Path]:
+    def list_available(self) -> list[Path]:
         return list_available_parsers(self.parser_paths)
 
     def find_parser_file(self, name: str) -> Path:
         expected_filename = f'{name}.so'
+        logger.debug('For language "%s", searching for parser file "%s"', name, expected_filename)
         for f in self.iter_available():
             logger.debug('For language "%s", trying %s', name, f)
             if f.name == expected_filename:
@@ -79,7 +84,6 @@ class ParserRegistry:
             raise ParserUnavailable(name, expected_filename)
 
     def _load(self, name: str) -> TSTuple:
-        logger.debug('For language "%s", searching for parser file', name)
         parser_file = self.find_parser_file(name)
         language, parser = load_parser(name, parser_file)
         self.parsers[name] = language, parser
@@ -97,7 +101,7 @@ class ParserRegistry:
                 result = result_maybe
         return result
 
-    def query(self, lang_name: str, query_text: str, source: bytes) -> List[Tuple[ts.Node, str]]:
+    def query(self, lang_name: str, query_text: str, source: bytes) -> list[tuple[ts.Node, str]]:
         language, parser = self.get(lang_name)
         tree = parser.parse(source)
         query = language.query(query_text)

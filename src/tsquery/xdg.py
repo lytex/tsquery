@@ -1,9 +1,15 @@
+from __future__ import annotations
+
 import logging
 import os
+from pathlib import Path
 from typing import Literal
 
 
 logger = logging.getLogger(__name__)
+
+
+# TODO: switch from "XDG_CONFIG_HOME" to "config"
 
 
 _XDG_HOME_T = Literal['XDG_CONFIG_HOME', 'XDG_DATA_HOME']
@@ -26,19 +32,14 @@ def get_xdg_home(key: _XDG_HOME_T) -> Path:
     return xdg_path
 
 
-def get_xdg_dirs(key: _XDG_DIRS_T) -> List[Path]:
+def get_xdg_dirs(key: _XDG_DIRS_T) -> tuple[Path, ...]:
     """ Implement XDG Base Directory Specification
     See: https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
     """
     if key == 'XDG_CONFIG_DIRS':
-        default = [
-            Path('/etc/xdg')
-        ]
+        default = (Path('/etc/xdg'),)
     elif key == 'XDG_DATA_DIRS':
-        default = [
-            Path('/usr/share'),
-            Path('/usr/local/share')
-        ]
+        default = (Path('/usr/share'), Path('/usr/local/share'))
     else:
         raise ValueError(f'Unrecognized XDG directory: {key}')
 
@@ -46,7 +47,6 @@ def get_xdg_dirs(key: _XDG_DIRS_T) -> List[Path]:
     if env_val is None:
         paths = default
     else:
-        paths = list(map(Path, env_val.split(':')))
+        paths = tuple(map(Path, env_val.split(':')))
     logger.debug('%s -> %s', key, ' : '.join(map(str, paths)))
     return paths
-
