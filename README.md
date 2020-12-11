@@ -9,6 +9,12 @@ Run [Tree Sitter](https://tree-sitter.github.io) queries from the command line.
 pip install tsquery
 ```
 
+For a general-purpose installation, [Pipx](https://pipxproject.github.io/pipx/installation/) is highly recommended:
+
+```shell
+pipx install tsquery
+```
+
 # Usage
 
 Parsers (`.so` files) should be installed somewhere in `$XDG_DATA_HOME` or
