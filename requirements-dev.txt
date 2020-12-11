@@ -1,0 +1,8 @@
+pip >= 20.3
+setuptools >= 50
+wheel
+debugpy
+pdbpp
+pytest
+mypy
+black

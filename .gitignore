@@ -1,0 +1,5 @@
+# COmment
+*.egg-info
+__pycache__
+.python-version
+.mypy_cache
