@@ -3,5 +3,7 @@
 .mypy_cache
 .pyre
 .python-version
+/build
+/dist
 __pycache__
 Session.vim

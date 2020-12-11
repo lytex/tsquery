@@ -4,6 +4,12 @@ setup(
     name='tsquery',
     version='0.1.1',
 
+    url='https://sr.ht/~wintershadows/tsquery',
+
+    author='Greg Werbin',
+    author_email='software@me.gregwerbin.com',
+    license='GPL-3.0-or-later',
+
     package_dir={'': 'src'},
     packages=find_packages('src'),
     entry_points={'console_scripts': ['tsquery = tsquery.__main__:cli']},
