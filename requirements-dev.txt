@@ -8,5 +8,7 @@ mypy
 pytest
 pytest-cov
 
-debugpy
+#debugpy
 pdbpp
+
+twine

@@ -73,6 +73,5 @@ def cli(language: str, encoding: str, query_text: str, list_parsers: bool, input
                 node_end = ','.join(map(str, node.end_point))
                 node_source_bytes = source_bytes[node.start_byte : node.end_byte]
                 node_source = codecs.decode(node_source_bytes, encoding=encoding, errors='surrogateescape')
-                if i > 0:
-                    click.echo('')
-                click.echo(f'{input_file_for_display} {node_start} {node_end} {name}\n{node_source}')
+                node_source_indented = '\n'.join('\t'+line for line in node_source.splitlines(keepends=False))
+                click.echo(f'{input_file_for_display} {node_start} {node_end} {name}\n{node_source_indented}')
