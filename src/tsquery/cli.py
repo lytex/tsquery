@@ -87,9 +87,7 @@ def cli(language: str, encoding: str, query_text: str, list_parsers: bool, input
         else:
             input_file_for_display = input_file or '(stdin)'
             for i, (node, name) in enumerate(captures):
-                node_start = ','.join(map(str, node.start_point))
-                node_end = ','.join(map(str, node.end_point))
                 node_source_bytes = source_bytes[node.start_byte : node.end_byte]
                 node_source = codecs.decode(node_source_bytes, encoding=encoding, errors='surrogateescape')
-                node_source_indented = '\n'.join('\t'+line for line in node_source.splitlines(keepends=False))
-                click.echo(f'{input_file_for_display} {node_start} {node_end} {name}\n{node_source_indented}')
+                node_source_indented = '\n'.join(line for line in node_source.splitlines(keepends=False))
+                click.echo(f'{node_source_indented}')
