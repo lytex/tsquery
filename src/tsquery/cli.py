@@ -46,9 +46,10 @@ def die(status: int, msg: str) -> None:
 @click.option('-l', '--language', default=None)
 @click.option('-e', '--encoding', default='utf-8')
 @click.option('--list-parsers', is_flag=True, default=False)
+@click.option('--only-code', is_flag=True, default=False)
 @click.argument('query_text')
 @click.argument('input_files', nargs=-1, type=click.Path(exists=True, dir_okay=False, allow_dash=True))
-def cli(language: str, encoding: str, query_text: str, list_parsers: bool, input_files: tuple[Optional[str]]) -> None:
+def cli(language: str, encoding: str, query_text: str, list_parsers: bool, only_code: bool, input_files: tuple[Optional[str]]) -> None:
     registry = ParserRegistry()
 
     if list_parsers:
@@ -87,7 +88,13 @@ def cli(language: str, encoding: str, query_text: str, list_parsers: bool, input
         else:
             input_file_for_display = input_file or '(stdin)'
             for i, (node, name) in enumerate(captures):
+                node_start = ','.join(map(str, node.start_point))
+                node_end = ','.join(map(str, node.end_point))
                 node_source_bytes = source_bytes[node.start_byte : node.end_byte]
                 node_source = codecs.decode(node_source_bytes, encoding=encoding, errors='surrogateescape')
-                node_source_indented = '\n'.join(line for line in node_source.splitlines(keepends=False))
-                click.echo(f'{node_source_indented}')
+                if only_code:
+                    node_source_indented = '\n'.join(line for line in node_source.splitlines(keepends=False))
+                    click.echo(node_source_indented)
+                else:
+                    node_source_indented = '\n'.join('\t'+line for line in node_source.splitlines(keepends=False))
+                    click.echo(f'{input_file_for_display} {node_start} {node_end} {name}\n{node_source_indented}')

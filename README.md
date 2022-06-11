@@ -2,7 +2,9 @@
 
 Run [Tree Sitter](https://tree-sitter.github.io) queries from the command line.
 
-Forked from [https://git.sr.ht/~wintershadows/tsquery] to write only the text that matches the query
+Forked from [https://git.sr.ht/~wintershadows/tsquery] to write only the text from the code that matches the query
+
+To write only the code add a `--only-code` argument
 
 
 # Installation
